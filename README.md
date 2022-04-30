@@ -6,3 +6,5 @@ This was done using two ESP-32 microcontrollers (specifically ESP32-WROOM-32) th
 The messaging was done through a Pub/Sub pattern using PubNub's service.
 
 Heavily inspired by https://github.com/pblesi/touch_light, but adapted to the European market. Schematics which pins to soder can be found on his blog post.
+
+These images explain what functionalities the code provides: https://imgur.com/a/UMALs2h
