@@ -28,10 +28,11 @@ boolean lamp_off = false;
 
 const char* mqttServer = "mqtt.pndsn.com";
 const int mqttPort = 1883;
-const char* clientID = "pub-c-998558f2-4c6e-455d-b627-43a07aaf1d54/sub-c-3796a684-2c34-11eb-ae78-c6faad964e01/deni";
-const char* deni_send_channel = "deni_send_channel";
-const char* april_send_channel = "april_send_channel";
+const char* clientID = "YOUR_CLIENT_ID/CHANNEL";
+const char* channel_one = "channel_one";
+const char* channel_two = "channel_two";
 
+// These colors can be changed to anything you like.
 int colorID = 0;
 const int colors[16][3] = {
   {204, 0, 0},
@@ -52,6 +53,7 @@ const int colors[16][3] = {
   {166, 41, 41}
 };
 
+// This part is just for the website that shows up when you are first configuring the lamp, i.e. choosing a Wi-Fi to connect to.
 static const char PROGMEM html[] = R"*lit(
 <!DOCTYPE html>
 <html>
@@ -137,6 +139,7 @@ String delCredential(PageArgument& args) {
   return "";
 }
 
+// Change color when there is a message from the other channel.
 void callback(char* topic, byte* payload, unsigned int length) {
     String payload_buff;
     for (int i=0;i<length;i++)
@@ -150,12 +153,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
     strip.show();
 }
 
+// If for any reason, the pubsub disconnects, this will try reconnecting it.
 boolean reconnect() {
     if (client.connect(clientID))
-        client.subscribe(april_send_channel);
+        client.subscribe(channel_two);
     return client.connected();
 }
 
+// Used to fade the lamp in an out.
 void fade_in_out() {
   if(faded_to_zero) {
     for(int brightness = 0; brightness <= 255; brightness++) {
@@ -178,6 +183,7 @@ void fade_in_out() {
   }
 }
 
+// Used to fade the lamp in an out, but in orange.
 void fade_in_out_orange() {
   if(faded_to_zero) {
     for(int brightness = 0; brightness <= 255; brightness++) {
@@ -200,6 +206,7 @@ void fade_in_out_orange() {
   }
 }
 
+// The lamp flashes twice when it successfully connects to a Wi-Fi.
 void flash_twice() {
       for(int i = 0; i < 2; i++) {
         uint32_t newColor = strip.Color(255, 255, 255);
@@ -215,6 +222,7 @@ void flash_twice() {
       }
 }
 
+// Setup is run when the controller first gets power.
 void setup() {
   delay(1000);
   Serial.begin(115200);
@@ -238,6 +246,7 @@ void setup() {
   flash_twice();
 }
 
+// This is the main loop that checks when the top of the lamp was touched.
 void loop() {
   if(WiFi.status() != WL_CONNECTED) {
     Serial.println("Currently not connected");
@@ -275,7 +284,7 @@ void loop() {
                   for(int i=0; i<strip.numPixels(); i++)
                       strip.setPixelColor(i, newColor);
                   strip.show();
-                  client.publish(deni_send_channel, ColorIDString.c_str()); // Publish message.
+                  client.publish(channel_one, ColorIDString.c_str()); // Publish message.
                 }
               } else if (diff > 450 && diff < 3000) {
                   if(lamp_off) {
